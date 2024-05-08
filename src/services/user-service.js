@@ -30,11 +30,33 @@ class UserService {
       //3) if password match then create token and send it to user
       const newJwt = this.createToken({
         email: user.email,
-        password: user.password,
+        id: user.id,
       });
       return newJwt;
     } catch (err) {
       console.log("Something went wrong in sign in process");
+      throw err;
+    }
+  }
+  async isAuthenticated(token) {
+    try {
+      const response = this.verifyToken(token);
+      if (!response) {
+        throw {
+          err: "token not valid",
+        };
+      }
+      console.log(response);
+      const user = await this.userRepository.getById(response.id);
+      console.log(user);
+
+      if (!user) {
+        throw {
+          err: " user does not exist",
+        };
+      }
+      return user.id;
+    } catch (err) {
       throw err;
     }
   }
